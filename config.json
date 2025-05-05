@@ -1,0 +1,18 @@
+{
+    "server": {
+        "host": "127.0.0.1",
+        "port": 8080,
+        "tls": {
+            "enabled": false,
+            "cert_path": "certs/cert.pem",
+            "key_path": "certs/key.pem"
+        }
+    },
+    "static": {
+        "enabled": true,
+        "root_dir": "public"
+    },
+    "logging": {
+        "level": "info"
+    }
+} 

@@ -5,7 +5,10 @@
 ## 🌐 Features
 
 - Zero-config HTTP server
-- Serves static files or dynamic responses
+- Static file serving with proper MIME types
+- TLS/HTTPS support
+- Structured logging
+- JSON configuration
 - Written in idiomatic Rust
 - Easy to customize or extend
 - Tiny binary size
@@ -23,20 +26,56 @@
 git clone https://github.com/makalin/rh.git
 cd rh
 cargo run
-````
+```
 
-Server starts on `http://127.0.0.1:8080`
+Server starts on `http://127.0.0.1:8080` by default
 
-## 📦 Example Usage
+## 📦 Configuration
 
+The server is configured via `config.json`:
+
+```json
+{
+    "server": {
+        "host": "127.0.0.1",
+        "port": 8080,
+        "tls": {
+            "enabled": false,
+            "cert_path": "certs/cert.pem",
+            "key_path": "certs/key.pem"
+        }
+    },
+    "static": {
+        "enabled": true,
+        "root_dir": "public"
+    },
+    "logging": {
+        "level": "info"
+    }
+}
+```
+
+### TLS Setup
+
+To enable HTTPS:
+
+1. Generate self-signed certificates:
 ```bash
-curl http://localhost:8080/
+mkdir -p certs
+openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem -days 365 -nodes
 ```
 
-Sample response:
-
-```
-Hello from RH!
+2. Update `config.json`:
+```json
+{
+    "server": {
+        "tls": {
+            "enabled": true,
+            "cert_path": "certs/cert.pem",
+            "key_path": "certs/key.pem"
+        }
+    }
+}
 ```
 
 ## 📁 Project Structure
@@ -44,28 +83,52 @@ Hello from RH!
 ```
 rh/
 ├── src/
-│   └── main.rs       # Entry point
-├── Cargo.toml        # Dependencies & metadata
-└── README.md         # This file
+│   ├── main.rs          # Server implementation
+│   ├── config.rs        # Configuration handling
+│   └── static_files.rs  # Static file serving
+├── public/             # Static files directory
+│   └── index.html      # Sample static file
+├── certs/              # TLS certificates
+├── config.json         # Server configuration
+├── Cargo.toml          # Dependencies & metadata
+└── README.md           # This file
 ```
 
-## 🔧 Configuration
+## 🔧 Usage Examples
 
-Currently hardcoded to bind to `127.0.0.1:8080`. You can change this in `main.rs`.
+### Basic HTTP Server
 
----
+```bash
+curl http://localhost:8080/
+```
+
+### Static File Serving
+
+```bash
+curl http://localhost:8080/index.html
+```
+
+### HTTPS (when enabled)
+
+```bash
+curl --insecure https://localhost:8080/
+```
 
 ## 🧱 Tech Stack
 
 * Rust `std::net::TcpListener`
-* No frameworks (can be extended with `hyper`, `axum`, or `warp`)
+* `rustls` for TLS support
+* `serde` for configuration
+* `log` for structured logging
+* No web frameworks (can be extended with `hyper`, `axum`, or `warp`)
 
 ## 🛠️ Future Plans
 
-* Config file for host/port
-* Static file server mode
-* Logging
-* TLS support
+* Request routing
+* Middleware support
+* Compression
+* CORS configuration
+* WebSocket support
 
 ## 📄 License
 
